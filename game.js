@@ -4,7 +4,7 @@ const config = {
   width: 640,
   heigth: 640,
   scale: {
-    mode: Phaser.Scale.RESIZE,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   scene: {

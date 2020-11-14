@@ -30,8 +30,9 @@ const goalShapeTweenX = 5;
 const goalShapeTweenY = 8;
 const goalShapeWidth = 64;
 const goalShapeHeight = 64;
-const goalShapeInnerWidthOffset = config.width - goalShapeWidth;
-const goalShapeInnerHeightOffset = config.heigth - goalShapeHeight;
+var maxWindow = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
+const goalShapeInnerWidthOffset = maxWindow - goalShapeWidth;
+const goalShapeInnerHeightOffset = maxWindow - goalShapeHeight;
 
 window.addEventListener('resize', () => {
   var max = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;

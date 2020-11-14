@@ -4,7 +4,7 @@ const config = {
   width: 640,
   heigth: 640,
   scale: {
-    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   scene: {
@@ -32,6 +32,10 @@ const goalShapeWidth = 64;
 const goalShapeHeight = 64;
 const goalShapeInnerWidthOffset = config.width - goalShapeWidth;
 const goalShapeInnerHeightOffset = config.heigth - goalShapeHeight;
+
+window.addEventListener('resize', () => {
+  game.scale.resize(window.innerWidth, window.innerHeight);
+});
 
 function preload() {
   this.load.image("background", "assets/background.png");

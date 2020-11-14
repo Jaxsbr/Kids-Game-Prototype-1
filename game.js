@@ -34,7 +34,8 @@ const goalShapeInnerWidthOffset = config.width - goalShapeWidth;
 const goalShapeInnerHeightOffset = config.heigth - goalShapeHeight;
 
 window.addEventListener('resize', () => {
-  game.scale.resize(window.innerWidth, window.innerHeight);
+  var max = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
+  game.scale.resize(max, max);
 });
 
 function preload() {

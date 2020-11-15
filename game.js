@@ -1,8 +1,11 @@
+var min = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
+var max = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight;
+
 const config = {
   type: Phaser.AUTO,
   parent: "game",
-  width: 640,
-  heigth: 640,
+  width: window.innerWidth,
+  heigth: window.innerHeight,
   scale: {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -22,22 +25,16 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-const shapeCount = 5;
+var shapeCount = 5;
 const shapes = ["circle", "square", "triangle", "star"];
 const shapeTints = ["0x00ff00", "0xffff00", "0x0000ff", "0xff8800"];
 const goalShapeTints = ["0xe9c7ff", "0xc873ff"];
-const goalShapeTweenX = 5;
-const goalShapeTweenY = 8;
-const goalShapeWidth = 64;
-const goalShapeHeight = 64;
-var maxWindow = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
-const goalShapeInnerWidthOffset = maxWindow - goalShapeWidth;
-const goalShapeInnerHeightOffset = maxWindow - goalShapeHeight;
-
-window.addEventListener('resize', () => {
-  var max = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
-  game.scale.resize(max, max);
-});
+const goalShapeWidth = min / 10;
+const goalShapeHeight = min / 10;
+const goalShapeTweenX = goalShapeWidth / 13;
+const goalShapeTweenY = goalShapeHeight / 8;
+const goalShapeInnerWidthOffset = window.innerWidth - goalShapeWidth;
+const goalShapeInnerHeightOffset = window.innerHeight - goalShapeHeight;
 
 function preload() {
   this.load.image("background", "assets/background.png");
@@ -63,14 +60,48 @@ function create() {
 
   this.input.addPointer(1);
 
-  this.add.image(0, 0, "background").setOrigin(0, 0);
+  var background = this.add.image(window.innerWidth / 2, window.innerHeight / 2, "background");
+  background.displayWidth = window.innerWidth;
+  background.displayHeight = window.innerHeight;
+  //background.smoothed = false;
 
   this.goalShapes = this.physics.add.staticGroup();
 
-  setupGoalShapes(this, 0, 0, "circle", goalShapeTints[1], goalShapeTweenX, goalShapeTweenY);
-  setupGoalShapes(this, 0, goalShapeInnerHeightOffset, "square", goalShapeTints[1], goalShapeTweenX, goalShapeInnerHeightOffset - goalShapeTweenY);
-  setupGoalShapes(this, goalShapeInnerWidthOffset, 0, "triangle", goalShapeTints[1], goalShapeInnerWidthOffset - goalShapeTweenX, goalShapeTweenY);
-  setupGoalShapes(this, goalShapeInnerWidthOffset, goalShapeInnerHeightOffset, "star", goalShapeTints[1], goalShapeInnerWidthOffset - goalShapeTweenX, goalShapeInnerHeightOffset - goalShapeTweenY);
+  setupGoalShapes(
+    this, 
+    0, 
+    0, 
+    "circle", 
+    goalShapeTints[1], 
+    goalShapeTweenX, 
+    goalShapeTweenY);
+
+  setupGoalShapes(
+    this, 
+    0, 
+    goalShapeInnerHeightOffset, 
+    "square", 
+    goalShapeTints[1], 
+    goalShapeTweenX, 
+    goalShapeInnerHeightOffset - goalShapeTweenY);
+
+  setupGoalShapes(
+    this, 
+    goalShapeInnerWidthOffset, 
+    0, 
+    "triangle", 
+    goalShapeTints[1], 
+    goalShapeInnerWidthOffset - goalShapeTweenX, 
+    goalShapeTweenY);
+
+  setupGoalShapes(
+    this, 
+    goalShapeInnerWidthOffset, 
+    goalShapeInnerHeightOffset, 
+    "star", 
+    goalShapeTints[1], 
+    goalShapeInnerWidthOffset - goalShapeTweenX, 
+    goalShapeInnerHeightOffset - goalShapeTweenY);
 
   this.moveableShapes = this.physics.add.group();
 
@@ -105,7 +136,7 @@ function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
 }
 
 function newRound(callingContext) {
-  var shapePlottingArea = new Phaser.Geom.Circle(320, 320, 150);
+  var shapePlottingArea = new Phaser.Geom.Circle(window.innerWidth / 2, window.innerHeight / 2, min / 3);
 
   for (let i = 0; i < shapeCount; i++) {
     var shape = randomShape();
@@ -160,6 +191,7 @@ function randomTint() {
 function update() {
   if (this.moveableShapes.children.entries.length === 0) {
     this.sound.play("celebrate");
+    shapeCount++;
     newRound(this);
   }
 }

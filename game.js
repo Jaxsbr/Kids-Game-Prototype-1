@@ -26,6 +26,9 @@ const config = {
 
 const game = new Phaser.Game(config);
 var shapeCount = 5;
+
+const cartoonascSounds = ["cartoonasc1", "cartoonasc2", "cartoonasc3", "cartoonasc4"];
+
 const shapes = ["circle", "square", "triangle", "star"];
 const shapeTints = ["0x00ff00", "0xffff00", "0x0000ff", "0xff8800"];
 const goalShapeTints = ["0xe9c7ff", "0xc873ff"];
@@ -43,9 +46,12 @@ function preload() {
   this.load.image("triangle", "assets/triangle.png");
   this.load.image("star", "assets/star.png");
 
-  this.load.audio("cartoon", [
-    "assets/zapsplat_cartoon_xylophone_short_fast_ascend_001_53040.mp3",
-  ]);
+  for (let index = 0; index < cartoonascSounds.length; index++) {
+    const sound = cartoonascSounds[index];
+    this.load.audio(sound, [
+      `assets/${sound}.mp3`,
+    ]);
+  }
 
   this.load.audio("celebrate", [
     "assets/zapsplat_fantasy_magic_spell_cast_cheesy_classic_glisando_002_54395.mp3",
@@ -171,11 +177,16 @@ function shapeOverlap(moveableShape, goalShape) {
   }
 
   this.moveableShapes.remove(moveableShape, true, true);
-  this.sound.play("cartoon");
+  this.sound.play(randomCartoonasc());
 }
 
 function shapesMatching(moveableShape, goalShape) {
   return moveableShape.getData("shape") === goalShape.getData("shape");
+}
+
+function randomCartoonasc() {
+  const cartoonascIndex = Phaser.Math.Between(0, 3);
+  return cartoonascSounds[cartoonascIndex];
 }
 
 function randomShape() {

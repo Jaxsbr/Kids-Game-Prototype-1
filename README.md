@@ -1,4 +1,5 @@
 # Kids Game Prototype
+![](game.png)
 
 ## What is this?
 This is a simple JavaScript game using Phaser 3. My goal with this game is to see if I could make something fun my kids can play with.

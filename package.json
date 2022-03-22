@@ -2,7 +2,7 @@
   "name": "kids-game-prototype-1",
   "version": "1.0.0",
   "description": "This is a simple JavaScript game using Phaser 3. My goal with this game is to see if I could make something fun my kids can play with.",
-  "main": "index.html",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

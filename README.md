@@ -1,7 +1,7 @@
 # Kids Game Prototype
 
 ## What is this?
-This is a simple JavaScript game using Phaser 3. My goal with this game is to see if I could make something fun my kids can play with.
+This is a simple JavaScript game using Phaser 3. My goal with this game is to make something fun for young kids.
 
 ## Game mechanic
 Four shapes are rendered at the corners of the screen.

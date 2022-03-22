@@ -21,4 +21,3 @@ A random number of these four shapes are also rendered in the middle of the scre
 
 ## Issues
 - Strech to fill screen behavior renders shapes inconsistently. (far appart, on top of each other)
-- Shapes render out partially of bounds on mobile devices

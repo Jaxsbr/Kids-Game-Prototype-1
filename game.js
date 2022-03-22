@@ -1,3 +1,5 @@
+// TODO: Decide and render the game on acceptable bounds per device type
+// and only fill/stretch the background.
 var min = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
 var max = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight;
 
@@ -32,8 +34,8 @@ const cartoonascSounds = ["cartoonasc1", "cartoonasc2", "cartoonasc3", "cartoona
 const shapes = ["circle", "square", "triangle", "star"];
 const shapeTints = ["0x00ff00", "0xffff00", "0x0000ff", "0xff8800"];
 const goalShapeTints = ["0xe9c7ff", "0xc873ff"];
-const goalShapeWidth = min / 10;
-const goalShapeHeight = min / 10;
+const goalShapeWidth = min / 5;
+const goalShapeHeight = min / 5;
 const goalShapeTweenX = goalShapeWidth / 13;
 const goalShapeTweenY = goalShapeHeight / 8;
 const goalShapeInnerWidthOffset = window.innerWidth - goalShapeWidth;
@@ -125,12 +127,15 @@ function create() {
 
 function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
   const shapeCount = callingContext.goalShapes.children.entries.length;  
-  callingContext.goalShapes
+  const createdShape = callingContext.goalShapes
     .create(x, y, shape)
     .setOrigin(0, 0)
     .setTintFill(tint)
     .refreshBody()
     .setData("shape", shape);
+  
+  createdShape.setSize(goalShapeWidth, goalShapeHeight);
+  createdShape.setDisplaySize(goalShapeWidth, goalShapeHeight);
 
   callingContext.tweens.add({
     targets: callingContext.goalShapes.children.entries[shapeCount],

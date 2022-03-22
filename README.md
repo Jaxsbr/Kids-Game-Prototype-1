@@ -18,6 +18,3 @@ A random number of these four shapes are also rendered in the middle of the scre
 - Sounds and visuals are important as they provide audible confirmation of any action the child performs. These should be bright and clear. (optionally animated)
 - Children will find it easier using a touch screen device VS a PC that require mouse control skills
 - The game requires a repeateable and rewarding mechanic. Unlike games for older audiences, it does not require specific goals. e.g. completing a level in (x) time.
-
-## Issues
-- Strech to fill screen behavior renders shapes inconsistently. (far appart, on top of each other)

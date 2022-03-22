@@ -1,5 +1,4 @@
 # Kids Game Prototype
-![](game.png)
 
 ## What is this?
 This is a simple JavaScript game using Phaser 3. My goal with this game is to see if I could make something fun my kids can play with.
@@ -7,6 +6,8 @@ This is a simple JavaScript game using Phaser 3. My goal with this game is to se
 ## Game mechanic
 Four shapes are rendered at the corners of the screen.
 A random number of these four shapes are also rendered in the middle of the screen. The player can now press and hold a shape from the middle and drag it to a corresponding shape in the corner. Once the shapes intersects, a sound plays and the dragged shape dissapears. Once the player has moved all shapes from the middle succesfully, a different "celebration" sound is played and new set of shapes if generated, allowing replay.
+
+![example of game appearance](game.png)
 
 ### This game is designed with the following assumptions:
 - Sounds and visuals are important as they provide audible confirmation of any action the child performs. These should be bright and clear. (optionally animated)

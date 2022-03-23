@@ -26,10 +26,13 @@ const config = {
   },
 };
 
+const soundQueue = [];
+
 const game = new Phaser.Game(config);
 var shapeCount = 5;
 
 const cartoonascSounds = ["cartoonasc1", "cartoonasc2", "cartoonasc3", "cartoonasc4"];
+const catSounds = ["meow1", "meow2"];
 
 const shapes = ["circle", "square", "triangle", "star"];
 const shapeTints = ["0x00ff00", "0xffff00", "0x0000ff", "0xff8800"];
@@ -47,6 +50,7 @@ function preload() {
   this.load.image("square", "assets/square.png");
   this.load.image("triangle", "assets/triangle.png");
   this.load.image("star", "assets/star.png");
+  this.load.image("cat1", "assets/cat1.png");
 
   for (let index = 0; index < cartoonascSounds.length; index++) {
     const sound = cartoonascSounds[index];
@@ -59,6 +63,12 @@ function preload() {
     "assets/zapsplat_fantasy_magic_spell_cast_cheesy_classic_glisando_002_54395.mp3",
   ]);
 
+  for (let index = 0; index < catSounds.length; index++) {
+    const sound = catSounds[index];
+    this.load.audio(sound, [
+      `assets/${sound}.mp3`,
+    ]);
+  }
 }
 
 function create() {
@@ -113,6 +123,17 @@ function create() {
 
   this.moveableShapes = this.physics.add.group();
 
+  this.tapAndPopObjects = this.physics.add.group();
+
+  const catCount = Phaser.Math.Between(0, 3);
+  for (let index = 0; index < catCount; index++) {
+    setupCat1(
+      this, 
+      (goalShapeInnerWidthOffset / 2) - (goalShapeWidth / 2), 
+      goalShapeInnerHeightOffset);
+  
+  }
+
   newRound(this);
 
   this.input.topOnly = true;
@@ -123,6 +144,17 @@ function create() {
   this.input.on("dragend", function (pointer, gameObject, dragX, dragY) {
     gameObject.setTintFill(gameObject.getData("tint"));
   });
+  this.input.on("gameobjectdown", function(pointer, gameObject) {
+    if (gameObject.getData("type") === "cat1") {
+      gameObject.destroy();
+      soundQueue.push([getRandomCatMeow()]);
+    }
+  });
+}
+
+function getRandomCatMeow() {
+  const meowIndex = Phaser.Math.Between(0, catSounds.length - 1);
+  return catSounds[meowIndex];
 }
 
 function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
@@ -144,6 +176,24 @@ function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
       y: { value: tweenY, duration: 500, ease: 'Linear', yoyo: true, repeat: -1 }
     }
   })
+}
+
+function setupCat1(callingContext, x, y) {
+  var cat1 = callingContext.tapAndPopObjects
+    .create(x, y, "cat1")
+    .setOrigin(0, 0)
+    .setData("type", "cat1")
+    .setInteractive();
+  
+  var catPlottingArea = new Phaser.Geom.Circle(window.innerWidth / 2, window.innerHeight / 2, min / 3);
+  Phaser.Actions.RandomCircle(
+      callingContext.tapAndPopObjects.getChildren(),
+      catPlottingArea
+    );
+
+  // TODO: provide cat size variables
+  cat1.setSize(goalShapeWidth, goalShapeHeight);
+  cat1.setDisplaySize(goalShapeWidth, goalShapeHeight);
 }
 
 function newRound(callingContext) {
@@ -190,17 +240,17 @@ function shapesMatching(moveableShape, goalShape) {
 }
 
 function randomCartoonasc() {
-  const cartoonascIndex = Phaser.Math.Between(0, 3);
+  const cartoonascIndex = Phaser.Math.Between(0, shapes.length - 1);
   return cartoonascSounds[cartoonascIndex];
 }
 
 function randomShape() {
-  const shapeIndex = Phaser.Math.Between(0, 3);
+  const shapeIndex = Phaser.Math.Between(0, shapes.length - 1);
   return shapes[shapeIndex];
 }
 
 function randomTint() {
-  const tintIndex = Phaser.Math.Between(0, 3);
+  const tintIndex = Phaser.Math.Between(0, shapes.length - 1);
   return shapeTints[tintIndex];
 }
 
@@ -209,5 +259,10 @@ function update() {
     this.sound.play("celebrate");
     shapeCount++;
     newRound(this);
+  }
+
+  if (soundQueue.length > 0) {
+    const sound = soundQueue.pop();
+    this.sound.play(sound);
   }
 }

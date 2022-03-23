@@ -29,10 +29,12 @@ const config = {
 const soundQueue = [];
 
 const game = new Phaser.Game(config);
-var shapeCount = 5;
+var shapeCount = 3;
 
 const cartoonascSounds = ["cartoonasc1", "cartoonasc2", "cartoonasc3", "cartoonasc4"];
 const catSounds = ["meow1", "meow2"];
+const celebrateSoundName = "celebrate";
+const thudSoundName = "thud";
 
 const shapes = ["circle", "square", "triangle", "star"];
 const shapeTints = ["0x00ff00", "0xffff00", "0x0000ff", "0xff8800"];
@@ -59,8 +61,12 @@ function preload() {
     ]);
   }
 
-  this.load.audio("celebrate", [
-    "assets/zapsplat_fantasy_magic_spell_cast_cheesy_classic_glisando_002_54395.mp3",
+  this.load.audio(celebrateSoundName, [
+    "assets/celebrate.mp3",
+  ]);
+
+  this.load.audio(thudSoundName, [
+    "assets/thud.mp3",
   ]);
 
   for (let index = 0; index < catSounds.length; index++) {
@@ -72,67 +78,49 @@ function preload() {
 }
 
 function create() {
-
-  this.cartoon = this.sound.add("cartoon");
-  this.celebrate = this.sound.add("celebrate");
-
-  this.input.addPointer(1);
-
   var background = this.add.image(window.innerWidth / 2, window.innerHeight / 2, "background");
   background.displayWidth = window.innerWidth;
   background.displayHeight = window.innerHeight;
-  //background.smoothed = false;
 
   this.goalShapes = this.physics.add.staticGroup();
-
-  setupGoalShapes(
-    this, 
-    0, 
-    0, 
-    "circle", 
-    goalShapeTints[1], 
-    goalShapeTweenX, 
-    goalShapeTweenY);
-
-  setupGoalShapes(
-    this, 
-    0, 
-    goalShapeInnerHeightOffset, 
-    "square", 
-    goalShapeTints[1], 
-    goalShapeTweenX, 
-    goalShapeInnerHeightOffset - goalShapeTweenY);
-
-  setupGoalShapes(
-    this, 
-    goalShapeInnerWidthOffset, 
-    0, 
-    "triangle", 
-    goalShapeTints[1], 
-    goalShapeInnerWidthOffset - goalShapeTweenX, 
-    goalShapeTweenY);
-
-  setupGoalShapes(
-    this, 
-    goalShapeInnerWidthOffset, 
-    goalShapeInnerHeightOffset, 
-    "star", 
-    goalShapeTints[1], 
-    goalShapeInnerWidthOffset - goalShapeTweenX, 
-    goalShapeInnerHeightOffset - goalShapeTweenY);
-
   this.moveableShapes = this.physics.add.group();
-
   this.tapAndPopObjects = this.physics.add.group();
 
-  const catCount = Phaser.Math.Between(0, 3);
-  for (let index = 0; index < catCount; index++) {
-    setupCat1(
-      this, 
-      (goalShapeInnerWidthOffset / 2) - (goalShapeWidth / 2), 
-      goalShapeInnerHeightOffset);
-  
-  }
+  setupGoalShapes(
+    this, 
+    goalShapeWidth / 2,
+    goalShapeHeight / 2,
+    "circle", 
+    goalShapeTints[1], 
+    goalShapeWidth / 2 + goalShapeTweenX,
+    goalShapeHeight / 2 + goalShapeTweenY);
+
+  setupGoalShapes(
+    this, 
+    goalShapeWidth / 2, 
+    goalShapeInnerHeightOffset + goalShapeHeight / 2, 
+    "square", 
+    goalShapeTints[1], 
+    goalShapeWidth / 2 + goalShapeTweenX,
+    goalShapeInnerHeightOffset - (goalShapeTweenY - goalShapeHeight / 2));
+
+  setupGoalShapes(
+    this, 
+    goalShapeInnerWidthOffset + goalShapeWidth / 2, 
+    goalShapeHeight / 2,
+    "triangle", 
+    goalShapeTints[1], 
+    goalShapeInnerWidthOffset - (goalShapeTweenX - goalShapeWidth / 2), 
+    goalShapeHeight / 2 + goalShapeTweenY);
+
+  setupGoalShapes(
+    this, 
+    goalShapeInnerWidthOffset + goalShapeWidth / 2, 
+    goalShapeInnerHeightOffset + goalShapeHeight / 2, 
+    "star", 
+    goalShapeTints[1], 
+    goalShapeInnerWidthOffset - (goalShapeTweenX - goalShapeWidth / 2), 
+    goalShapeInnerHeightOffset - (goalShapeTweenY - goalShapeHeight / 2));
 
   newRound(this);
 
@@ -158,10 +146,9 @@ function getRandomCatMeow() {
 }
 
 function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
-  const shapeCount = callingContext.goalShapes.children.entries.length;  
   const createdShape = callingContext.goalShapes
     .create(x, y, shape)
-    .setOrigin(0, 0)
+    .setOrigin(0.5, 0.5)
     .setTintFill(tint)
     .refreshBody()
     .setData("shape", shape);
@@ -170,7 +157,7 @@ function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
   createdShape.setDisplaySize(goalShapeWidth, goalShapeHeight);
 
   callingContext.tweens.add({
-    targets: callingContext.goalShapes.children.entries[shapeCount],
+    targets: [createdShape],
     props: {
       x: { value: tweenX, duration: 750, ease: 'Linear', yoyo: true, repeat: -1 },
       y: { value: tweenY, duration: 500, ease: 'Linear', yoyo: true, repeat: -1 }
@@ -197,6 +184,7 @@ function setupCat1(callingContext, x, y) {
 }
 
 function newRound(callingContext) {
+  // Add new shapes
   var shapePlottingArea = new Phaser.Geom.Circle(window.innerWidth / 2, window.innerHeight / 2, min / 3);
 
   for (let i = 0; i < shapeCount; i++) {
@@ -223,16 +211,26 @@ function newRound(callingContext) {
     null,
     callingContext
   );
+
+  // Add new cats
+  const catCount = Phaser.Math.Between(0, 3);
+  for (let index = 0; index < catCount; index++) {
+    setupCat1(
+      callingContext, 
+      (goalShapeInnerWidthOffset / 2) - (goalShapeWidth / 2), 
+      goalShapeInnerHeightOffset);
+  }
 }
 
 function shapeOverlap(moveableShape, goalShape) {
   if (!shapesMatching(moveableShape, goalShape)) {
     moveableShape.setTintFill("0xff0000");
+    soundQueue.push([thudSoundName]);
     return;
   }
 
   this.moveableShapes.remove(moveableShape, true, true);
-  this.sound.play(randomCartoonasc());
+  soundQueue.push([randomCartoonasc()]);
 }
 
 function shapesMatching(moveableShape, goalShape) {
@@ -256,8 +254,8 @@ function randomTint() {
 
 function update() {
   if (this.moveableShapes.children.entries.length === 0) {
-    this.sound.play("celebrate");
-    shapeCount++;
+    soundQueue.push([celebrateSoundName]);
+    shapeCount = Phaser.Math.Between(3, 7);
     newRound(this);
   }
 

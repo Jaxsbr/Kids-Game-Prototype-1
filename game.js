@@ -29,10 +29,11 @@ const config = {
 const soundQueue = [];
 
 const game = new Phaser.Game(config);
-var shapeCount = 3;
 
 const cartoonascSounds = ["cartoonasc1", "cartoonasc2", "cartoonasc3", "cartoonasc4"];
-const catSounds = ["meow1", "meow2"];
+const catSounds = ["meow1", "meow2", "meow3", "meow4", "meow5", "meow6", "meow7"];
+const catImageCount = 3;
+const celebrateSounds = ["celebrate1", "celebrate2"];
 const celebrateSoundName = "celebrate";
 const thudSoundName = "thud";
 
@@ -45,6 +46,7 @@ const goalShapeTweenX = goalShapeWidth / 13;
 const goalShapeTweenY = goalShapeHeight / 8;
 const goalShapeInnerWidthOffset = window.innerWidth - goalShapeWidth;
 const goalShapeInnerHeightOffset = window.innerHeight - goalShapeHeight;
+let round = 0;
 
 function preload() {
   this.load.image("background", "assets/background.png");
@@ -52,7 +54,12 @@ function preload() {
   this.load.image("square", "assets/square.png");
   this.load.image("triangle", "assets/triangle.png");
   this.load.image("star", "assets/star.png");
-  this.load.image("cat1", "assets/cat1.png");
+
+  for (let index = 0; index < catImageCount; index++) {
+    this.load.image(`cat${index}`, [
+      `assets/cat${index}.png`,
+    ]);
+  }
 
   for (let index = 0; index < cartoonascSounds.length; index++) {
     const sound = cartoonascSounds[index];
@@ -61,9 +68,12 @@ function preload() {
     ]);
   }
 
-  this.load.audio(celebrateSoundName, [
-    "assets/celebrate.mp3",
-  ]);
+  for (let index = 0; index < celebrateSounds.length; index++) {
+    const sound = celebrateSounds[index];
+    this.load.audio(sound, [
+      `assets/${sound}.mp3`,
+    ]);
+  }
 
   this.load.audio(thudSoundName, [
     "assets/thud.mp3",
@@ -85,9 +95,14 @@ function create() {
   this.goalShapes = this.physics.add.staticGroup();
   this.moveableShapes = this.physics.add.group();
   this.tapAndPopObjects = this.physics.add.group();
+  
+  configureInput(this);
+  newRound(this);
+}
 
+function configureGoalShapes(callingContext) {
   setupGoalShapes(
-    this, 
+    callingContext, 
     goalShapeWidth / 2,
     goalShapeHeight / 2,
     "circle", 
@@ -96,7 +111,7 @@ function create() {
     goalShapeHeight / 2 + goalShapeTweenY);
 
   setupGoalShapes(
-    this, 
+    callingContext, 
     goalShapeWidth / 2, 
     goalShapeInnerHeightOffset + goalShapeHeight / 2, 
     "square", 
@@ -105,7 +120,7 @@ function create() {
     goalShapeInnerHeightOffset - (goalShapeTweenY - goalShapeHeight / 2));
 
   setupGoalShapes(
-    this, 
+    callingContext, 
     goalShapeInnerWidthOffset + goalShapeWidth / 2, 
     goalShapeHeight / 2,
     "triangle", 
@@ -114,26 +129,29 @@ function create() {
     goalShapeHeight / 2 + goalShapeTweenY);
 
   setupGoalShapes(
-    this, 
+    callingContext, 
     goalShapeInnerWidthOffset + goalShapeWidth / 2, 
     goalShapeInnerHeightOffset + goalShapeHeight / 2, 
     "star", 
     goalShapeTints[1], 
     goalShapeInnerWidthOffset - (goalShapeTweenX - goalShapeWidth / 2), 
     goalShapeInnerHeightOffset - (goalShapeTweenY - goalShapeHeight / 2));
+}
 
-  newRound(this);
+function configureInput(callingContext) {
+  callingContext.input.topOnly = true;
 
-  this.input.topOnly = true;
-  this.input.on("drag", function (pointer, gameObject, dragX, dragY) {
+  callingContext.input.on("drag", function (pointer, gameObject, dragX, dragY) {
     gameObject.x = dragX;
     gameObject.y = dragY;
   });
-  this.input.on("dragend", function (pointer, gameObject, dragX, dragY) {
+
+  callingContext.input.on("dragend", function (pointer, gameObject, dragX, dragY) {
     gameObject.setTintFill(gameObject.getData("tint"));
   });
-  this.input.on("gameobjectdown", function(pointer, gameObject) {
-    if (gameObject.getData("type") === "cat1") {
+
+  callingContext.input.on("gameobjectdown", function(pointer, gameObject) {
+    if (gameObject.getData("type") === "cat") {
       gameObject.destroy();
       soundQueue.push([getRandomCatMeow()]);
     }
@@ -143,6 +161,11 @@ function create() {
 function getRandomCatMeow() {
   const meowIndex = Phaser.Math.Between(0, catSounds.length - 1);
   return catSounds[meowIndex];
+}
+
+function getRandomCat() {
+  const catIndex = Phaser.Math.Between(0, catImageCount - 1);
+  return `cat${catIndex}`;
 }
 
 function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
@@ -165,27 +188,44 @@ function setupGoalShapes(callingContext, x, y, shape, tint, tweenX, tweenY) {
   })
 }
 
-function setupCat1(callingContext, x, y) {
-  var cat1 = callingContext.tapAndPopObjects
-    .create(x, y, "cat1")
-    .setOrigin(0, 0)
-    .setData("type", "cat1")
-    .setInteractive();
-  
-  var catPlottingArea = new Phaser.Geom.Circle(window.innerWidth / 2, window.innerHeight / 2, min / 3);
-  Phaser.Actions.RandomCircle(
-      callingContext.tapAndPopObjects.getChildren(),
-      catPlottingArea
-    );
+function setupCat(callingContext, x, y) {
+  const catCount = Phaser.Math.Between(1, 7);
+  for (let index = 0; index < catCount; index++) {
+    var randomCat = getRandomCat();
+    var cat = callingContext.tapAndPopObjects
+      .create(x, y, randomCat)
+      .setOrigin(0, 0)
+      .setData("type", "cat")
+      .setInteractive();
 
-  // TODO: provide cat size variables
-  cat1.setSize(goalShapeWidth, goalShapeHeight);
-  cat1.setDisplaySize(goalShapeWidth, goalShapeHeight);
+    // TODO: provide cat size variables
+    cat.setSize(goalShapeWidth, goalShapeHeight);
+    cat.setDisplaySize(goalShapeWidth, goalShapeHeight);
+
+    const tweenX = Phaser.Math.Between(x - goalShapeWidth * 2, x + goalShapeWidth * 2);
+    const tweenY = Phaser.Math.Between(y - goalShapeHeight * 2, y + goalShapeHeight * 2);
+    const xDuration = Phaser.Math.Between(2500, 3750);
+    const yDuration = Phaser.Math.Between(2500, 3750);
+    const delay = Phaser.Math.Between(0, 500);
+
+    // Power1 Sine.easeInOut Linear Bounce.easeOut
+    callingContext.tweens.add({
+      targets: [cat],
+      props: {
+        x: { value: tweenX, duration: xDuration },
+        y: { value: tweenY, duration: yDuration }
+      },
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+      delay: delay
+    })
+  }
 }
 
-function newRound(callingContext) {
-  // Add new shapes
+function setupMoveableShapes(callingContext) {
   var shapePlottingArea = new Phaser.Geom.Circle(window.innerWidth / 2, window.innerHeight / 2, min / 3);
+  var shapeCount = Phaser.Math.Between(1, 3);
 
   for (let i = 0; i < shapeCount; i++) {
     var shape = randomShape();
@@ -200,10 +240,18 @@ function newRound(callingContext) {
       .setData("tint", tint);
     callingContext.input.setDraggable(moveableShape);
   }
+
+  moveableShape.setSize(goalShapeWidth / 2, goalShapeHeight / 2);
+  moveableShape.setDisplaySize(goalShapeWidth / 2, goalShapeHeight / 2);
+
   Phaser.Actions.RandomCircle(
     callingContext.moveableShapes.getChildren(),
     shapePlottingArea
   );
+
+  moveableShape.setData("defaultX", moveableShape.x);
+  moveableShape.setData("defaultY", moveableShape.y);
+
   callingContext.physics.add.overlap(
     callingContext.moveableShapes,
     callingContext.goalShapes,
@@ -211,26 +259,52 @@ function newRound(callingContext) {
     null,
     callingContext
   );
+}
 
-  // Add new cats
-  const catCount = Phaser.Math.Between(0, 3);
-  for (let index = 0; index < catCount; index++) {
-    setupCat1(
+function newRound(callingContext) {  
+  callingContext.goalShapes.clear(true, true);
+  callingContext.tweens.killAll();
+
+  round = Phaser.Math.Between(0, 1);
+  if (round === 0) {
+    configureGoalShapes(callingContext)
+    setupMoveableShapes(callingContext);
+  } else {
+    setupCat(
       callingContext, 
-      (goalShapeInnerWidthOffset / 2) - (goalShapeWidth / 2), 
-      goalShapeInnerHeightOffset);
+      (goalShapeInnerWidthOffset / 2), 
+      (goalShapeInnerHeightOffset / 2));
   }
 }
 
 function shapeOverlap(moveableShape, goalShape) {
-  if (!shapesMatching(moveableShape, goalShape)) {
-    moveableShape.setTintFill("0xff0000");
-    soundQueue.push([thudSoundName]);
+  if (!shapesMatching(moveableShape, goalShape)) {    
+    processInvalidShapeOverlap(this, moveableShape);
     return;
   }
 
   this.moveableShapes.remove(moveableShape, true, true);
   soundQueue.push([randomCartoonasc()]);
+}
+
+function processInvalidShapeOverlap(callingContext, moveableShape) {
+  if (soundQueue.filter(s => s === thudSoundName).length === 0) {
+    soundQueue.push([thudSoundName]);
+  }
+
+  const defaultX = window.innerWidth / 2;
+  const defaultY = window.innerHeight / 2;
+
+  callingContext.tweens.add({
+    targets: [moveableShape],
+    props: {
+      x: { value: defaultX, duration: 200 },
+      y: { value: defaultY, duration: 200 }
+    },
+    ease: 'Sine.easeInOut',
+    yoyo: false,
+    repeat: 0,
+  })
 }
 
 function shapesMatching(moveableShape, goalShape) {
@@ -253,9 +327,13 @@ function randomTint() {
 }
 
 function update() {
-  if (this.moveableShapes.children.entries.length === 0) {
-    soundQueue.push([celebrateSoundName]);
-    shapeCount = Phaser.Math.Between(3, 7);
+  if (round === 0 && this.moveableShapes.children.entries.length === 0) {
+    soundQueue.push([celebrateSounds[0]]);
+    newRound(this);
+  }
+
+  if (round === 1 && this.tapAndPopObjects.children.entries.length === 0) {
+    soundQueue.push([celebrateSounds[1]]);
     newRound(this);
   }
 

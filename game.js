@@ -40,6 +40,8 @@ const thudSoundName = "thud";
 const shapes = ["circle", "square", "triangle", "star"];
 const shapeTints = ["0x00ff00", "0xffff00", "0x0000ff", "0xff8800"];
 const goalShapeTints = ["0xe9c7ff", "0xc873ff"];
+const moveableShapeWidth = min / 5.5;
+const moveableShapeHeight = min / 5.5;
 const goalShapeWidth = min / 5;
 const goalShapeHeight = min / 5;
 const goalShapeTweenX = goalShapeWidth / 13;
@@ -233,24 +235,19 @@ function setupMoveableShapes(callingContext) {
     var moveableShape = callingContext.moveableShapes
       .create(0, 0, shape)
       .setOrigin(0, 0)
-      .setScale(1)
       .setTintFill(tint)
       .setInteractive()
       .setData("shape", shape)
       .setData("tint", tint);
-    callingContext.input.setDraggable(moveableShape);
-  }
 
-  moveableShape.setSize(goalShapeWidth / 2, goalShapeHeight / 2);
-  moveableShape.setDisplaySize(goalShapeWidth / 2, goalShapeHeight / 2);
+    callingContext.input.setDraggable(moveableShape);
+    moveableShape.setDisplaySize(moveableShapeWidth, moveableShapeHeight);
+  }
 
   Phaser.Actions.RandomCircle(
     callingContext.moveableShapes.getChildren(),
     shapePlottingArea
   );
-
-  moveableShape.setData("defaultX", moveableShape.x);
-  moveableShape.setData("defaultY", moveableShape.y);
 
   callingContext.physics.add.overlap(
     callingContext.moveableShapes,
@@ -264,6 +261,7 @@ function setupMoveableShapes(callingContext) {
 function newRound(callingContext) {  
   callingContext.goalShapes.clear(true, true);
   callingContext.tweens.killAll();
+  callingContext.moveableShapes.clear(true, true);
 
   round = Phaser.Math.Between(0, 1);
   if (round === 0) {
@@ -289,7 +287,7 @@ function shapeOverlap(moveableShape, goalShape) {
 
 function processInvalidShapeOverlap(callingContext, moveableShape) {
   if (soundQueue.filter(s => s === thudSoundName).length === 0) {
-    soundQueue.push([thudSoundName]);
+    // soundQueue.push([thudSoundName]);
   }
 
   const defaultX = window.innerWidth / 2;
